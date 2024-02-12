@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "CtInstance.h"
+#include "CtDevice.h"
 
 #define CT_DEBUG
 
@@ -18,6 +19,11 @@ void Engine::StartEngine(EngineSettings settings){
 void Engine::CreateObjects(EngineSettings settings){
     CreateWindow(settings);
     CreateInstance(settings);
+    CreateDevices(settings);
+}
+
+void Engine::CreateDevices(EngineSettings settings){
+    devices = CtDevice::CreateDevice(this, settings);
 }
 
 void Engine::CreateWindow(EngineSettings settings){

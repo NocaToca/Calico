@@ -111,6 +111,10 @@ class CtInstance{
 
         void InitializeInstance(CtInstanceApplicationInfo ct_application_info, CtInstanceCreateInfo ct_create_info);
 
+        VkInstance* GetInstance(){
+            return &instance;
+        }
+
     private:
         VkInstance instance;
 

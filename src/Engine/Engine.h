@@ -2,6 +2,7 @@
 
 class CtWindow;
 class CtInstance;
+class CtDevice;
 
 struct EngineSettings{
 
@@ -23,6 +24,9 @@ class Engine{
         //Instance
         CtInstance* instance;
 
+        //Devices
+        CtDevice* devices;
+
         //Functions
         void EngineLoop();
         void Cleanup();
@@ -30,5 +34,7 @@ class Engine{
         void CreateWindow(EngineSettings settings);
         void CreateRenderer(EngineSettings settings);
         void CreateInstance(EngineSettings settings);
+        void CreateDevices(EngineSettings settings);
 
+    friend class CtDevice;
 };
