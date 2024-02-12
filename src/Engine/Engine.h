@@ -35,6 +35,7 @@ class Engine{
         void CreateRenderer(EngineSettings settings);
         void CreateInstance(EngineSettings settings);
         void CreateDevices(EngineSettings settings);
+        void CreateSurface(EngineSettings settings);
 
     friend class CtDevice;
 };

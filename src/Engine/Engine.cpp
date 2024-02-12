@@ -19,7 +19,12 @@ void Engine::StartEngine(EngineSettings settings){
 void Engine::CreateObjects(EngineSettings settings){
     CreateWindow(settings);
     CreateInstance(settings);
+    CreateSurface(settings);
     CreateDevices(settings);
+}
+
+void Engine::CreateSurface(EngineSettings settings){
+    window->CreateSurface(instance);
 }
 
 void Engine::CreateDevices(EngineSettings settings){

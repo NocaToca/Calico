@@ -5,6 +5,8 @@
 #include "Engine.h"
 #include <set>
 #include <string>
+#include "CtQueueFamily.h"
+#include "CtWindow.h"
 
 CtDevice* CtDevice::CreateDevice(Engine* ct_engine, EngineSettings settings){
     CtDevice* ct_device = new CtDevice();
@@ -12,7 +14,11 @@ CtDevice* CtDevice::CreateDevice(Engine* ct_engine, EngineSettings settings){
     CtDeviceRequirments requirements {};
     FillCtDeviceRequirements(requirements, VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU, true);
 
+    ct_device->queue_family = CtQueueFamily::CreateQueueFamily(ct_engine->window->GetSurface());
+
+    //Physical Device phase
     ct_device->ChooseDevice(*(ct_engine->instance), requirements);
+    ct_device->queue_family->ImplementQueueFamily(ct_device->physical_device);
 
     return ct_device;
 
@@ -60,9 +66,12 @@ bool CtDevice::IsDeviceSuitable(VkPhysicalDevice device, CtDeviceRequirments req
     //Once we get to queue families and swap chains we will implement those, but we need to check that we can use the swap chain extensions
     bool extensions_supported = CheckDeviceExtensionSupport(device);
 
+    bool queue_families_supported = queue_family->TestDevice(device);
+
     return  device_properties.deviceType == requirements.device_type &&
             device_features.samplerAnisotropy == requirements.has_sampler_anisotropy &&
-            extensions_supported;
+            extensions_supported &&
+            queue_families_supported;
 
 }
 

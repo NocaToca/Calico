@@ -1,6 +1,7 @@
 #include "CtWindow.h"
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
+#include "CtInstance.h"
 
 CtWindow::CtWindow(){
 
@@ -42,4 +43,14 @@ void CtWindow::PollEvents(){
 void CtWindow::Cleanup(){
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void CtWindow::CreateSurface(CtInstance* instance){
+    if(glfwCreateWindowSurface(*(instance->GetInstance()), window, nullptr, &surface) != VK_SUCCESS){
+        throw std::runtime_error("Window surface creation failed.");
+    }
+}
+
+VkSurfaceKHR* CtWindow::GetSurface(){
+    return &surface;
 }
