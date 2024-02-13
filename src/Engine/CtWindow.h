@@ -15,6 +15,7 @@ class CtWindow{
         void Cleanup();
         VkSurfaceKHR* GetSurface();
         void CreateSurface(CtInstance* instance);
+        GLFWwindow* GetWindow();
 
     private:
 

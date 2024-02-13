@@ -27,6 +27,12 @@ class CtQueueFamily{
         bool IsComplete();
         static CtQueueFamily* CreateQueueFamily(VkSurfaceKHR* surface);
         bool TestDevice(VkPhysicalDevice device);
+        uint32_t GraphicsFamilyValue(){
+            return graphics_family.value();
+        }
+        uint32_t PresentFamilyValue(){
+            return present_family.value();
+        }
 
 
     private:

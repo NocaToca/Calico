@@ -3,6 +3,7 @@
 class CtWindow;
 class CtInstance;
 class CtDevice;
+class CtSwapchain;
 
 struct EngineSettings{
 
@@ -27,6 +28,9 @@ class Engine{
         //Devices
         CtDevice* devices;
 
+        //Swapchain
+        CtSwapchain* swapchain;
+
         //Functions
         void EngineLoop();
         void Cleanup();
@@ -36,6 +40,8 @@ class Engine{
         void CreateInstance(EngineSettings settings);
         void CreateDevices(EngineSettings settings);
         void CreateSurface(EngineSettings settings);
+        void CreateSwapchain(EngineSettings settings);
 
     friend class CtDevice;
+    friend class CtSwapchain;
 };

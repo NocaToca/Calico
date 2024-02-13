@@ -5,6 +5,7 @@
 #include <vector>
 #include "CtInstance.h"
 #include "CtDevice.h"
+#include "CtSwapchain.h"
 
 #define CT_DEBUG
 
@@ -21,6 +22,11 @@ void Engine::CreateObjects(EngineSettings settings){
     CreateInstance(settings);
     CreateSurface(settings);
     CreateDevices(settings);
+    CreateSwapchain(settings);
+}
+
+void Engine::CreateSwapchain(EngineSettings settings){
+    swapchain = CtSwapchain::CreateSwapchain(this);
 }
 
 void Engine::CreateSurface(EngineSettings settings){

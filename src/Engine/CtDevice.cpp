@@ -7,6 +7,7 @@
 #include <string>
 #include "CtQueueFamily.h"
 #include "CtWindow.h"
+#include "CtSwapchain.h"
 
 CtDevice* CtDevice::CreateDevice(Engine* ct_engine, EngineSettings settings){
     CtDevice* ct_device = new CtDevice();
@@ -71,6 +72,11 @@ bool CtDevice::IsDeviceSuitable(VkPhysicalDevice device, CtDeviceRequirments req
 
     bool queue_families_supported = queue_family->TestDevice(device);
 
+    bool swap_chain_support = false;
+    if(extensions_supported){
+        CtSwapchainSupportDetails support_details = CtSwapchain::QuerySwapchainSupport(device, &queue_family->surface); 
+    }
+
     return  device_properties.deviceType == requirements.device_type &&
             device_features.samplerAnisotropy == requirements.has_sampler_anisotropy &&
             extensions_supported &&
@@ -82,6 +88,10 @@ void CtDevice::ChooseDevice(CtInstance ct_instance, CtDeviceRequirments requirem
 
     //Let's go through and choose a GPU
     uint32_t device_count = 0;
+
+    if(&ct_instance == nullptr){
+        throw std::runtime_error("Instance deleted itself.");
+    }
 
     vkEnumeratePhysicalDevices(*(ct_instance.GetInstance()), &device_count, nullptr);
 
@@ -101,6 +111,8 @@ void CtDevice::ChooseDevice(CtInstance ct_instance, CtDeviceRequirments requirem
             break;
         }
     }
+
+    // printf("Checkpoint");
 
     //Then we just want to check if we actually found a device before continuing
     if(physical_device == VK_NULL_HANDLE){
@@ -193,6 +205,10 @@ void CtDevice::CreateInterfaceDevice(){
     vkGetDeviceQueue(interface_device, queue_family->graphics_family.value(), 0, &(queue_family->graphics_queue));
     vkGetDeviceQueue(interface_device, queue_family->present_family.value(), 0, &(queue_family->present_queue));
 
+}
+
+VkDevice* CtDevice::GetInterfaceDevice(){
+    return &interface_device;
 }
 
 /******************************************************FEATURES ENABLE**********************************************************************/

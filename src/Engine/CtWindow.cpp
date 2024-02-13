@@ -54,3 +54,6 @@ void CtWindow::CreateSurface(CtInstance* instance){
 VkSurfaceKHR* CtWindow::GetSurface(){
     return &surface;
 }
+GLFWwindow* CtWindow::GetWindow(){
+    return window;
+}

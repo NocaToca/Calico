@@ -169,6 +169,11 @@ class CtDevice{
     public:
 
         static CtDevice* CreateDevice(Engine* engine, EngineSettings settings);
+        VkDevice* GetInterfaceDevice();
+        VkPhysicalDevice* GetPhysicalDevice(){
+            return &physical_device;
+        }
+
     private:
         //The actual GPU
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
@@ -207,4 +212,5 @@ class CtDevice{
 
     friend class Engine;
     friend class CtQueueFamily;
+    friend class CtSwapchain;
 };
