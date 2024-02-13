@@ -79,3 +79,23 @@ CtQueueFamily* CtQueueFamily::CreateQueueFamily(VkSurfaceKHR* surface){
 
     return queue_family;
 }
+
+void CtQueueFamily::PopulateQueueFamilyCreate(CtDeviceQueueCreateInfo& create_info, const void* pNext,
+            VkDeviceQueueCreateFlags flags, uint32_t queue_family_index, uint32_t queue_count,
+            const float* pointer_to_queue_priorites){
+    create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    create_info.pNext = pNext;
+    create_info.flags = flags;
+    create_info.queueFamilyIndex = queue_family_index;
+    create_info.queueCount = queue_count;
+    create_info.pQueuePriorities = pointer_to_queue_priorites;
+}
+
+void CtQueueFamily::TransferQueueFamilyCreate(CtDeviceQueueCreateInfo& ct_queue_create_info, VkDeviceQueueCreateInfo& vk_queue_create_info){
+    vk_queue_create_info.sType = ct_queue_create_info.sType;
+    vk_queue_create_info.pNext = ct_queue_create_info.pNext;
+    vk_queue_create_info.flags = ct_queue_create_info.flags;
+    vk_queue_create_info.queueFamilyIndex = ct_queue_create_info.queueFamilyIndex;
+    vk_queue_create_info.queueCount = ct_queue_create_info.queueCount;
+    vk_queue_create_info.pQueuePriorities = ct_queue_create_info.pQueuePriorities;
+}
