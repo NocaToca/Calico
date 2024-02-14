@@ -9,6 +9,78 @@
 #include "Engine.h"
 #include <stdexcept>
 
+//Since this function is static, I'm not going to use CtImageViewCreateInfo since that is not
+VkImageView CtSwapchain::CreateImageView(CtDevice* device, VkImage image, VkFormat format, VkImageAspectFlags aspect_flags){
+
+    VkImageViewCreateInfo image_view_create_info {};
+    image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    image_view_create_info.image = image;
+    image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    image_view_create_info.format = format;
+    image_view_create_info.subresourceRange.aspectMask = aspect_flags;
+    image_view_create_info.subresourceRange.baseMipLevel = 0;
+    image_view_create_info.subresourceRange.levelCount = 1;
+    image_view_create_info.subresourceRange.baseArrayLayer = 0;
+    image_view_create_info.subresourceRange.layerCount = 1;
+
+    VkImageView our_image_view;
+
+    if(vkCreateImageView(*(device->GetInterfaceDevice()), &image_view_create_info, nullptr, &our_image_view) != VK_SUCCESS){
+        throw std::runtime_error("Failed to create image views.");
+    }
+
+    return our_image_view;
+}
+
+void CtSwapchain::PopulateImageViewCreateInfo(CtImageViewCreateInfo& create_info,
+        const void* pointer_to_next, VkImageViewCreateFlags flags, VkImage image, VkImageViewType view_type,
+        VkFormat format, VkComponentMapping components, VkImageSubresourceRange subresource_range){
+    create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    create_info.pNext = pointer_to_next;
+    create_info.flags = flags;
+    create_info.image = image;
+    create_info.viewType = view_type;
+    create_info.format = format;
+    create_info.components = components;
+    create_info.subresourceRange = subresource_range;
+}
+
+void CtSwapchain::TransferImageViewCreateInfo(CtImageViewCreateInfo& ct_image_view_create_info, VkImageViewCreateInfo& vk_image_view_create_info){
+    vk_image_view_create_info.sType = ct_image_view_create_info.sType;
+    vk_image_view_create_info.pNext = ct_image_view_create_info.pNext;
+    vk_image_view_create_info.flags = ct_image_view_create_info.flags;
+    vk_image_view_create_info.image = ct_image_view_create_info.image;
+    vk_image_view_create_info.viewType = ct_image_view_create_info.viewType;
+    vk_image_view_create_info.format = ct_image_view_create_info.format;
+    vk_image_view_create_info.components = ct_image_view_create_info.components;
+    vk_image_view_create_info.subresourceRange = ct_image_view_create_info.subresourceRange;
+}
+
+void CtSwapchain::InitializeSwapchainImageViews(){
+    size_t swapchain_images_count = swapchain_images.size();
+
+    swapchain_image_views.resize(swapchain_images_count);
+
+    for(size_t i = 0; i < swapchain_images_count; i++){
+        CtImageViewCreateInfo ct_create_info {};
+        VkComponentMapping components {};
+        components.r = VK_COMPONENT_SWIZZLE_IDENTITY; components.g = VK_COMPONENT_SWIZZLE_IDENTITY; components.b = VK_COMPONENT_SWIZZLE_IDENTITY; components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        VkImageSubresourceRange resource_range {};
+        resource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; resource_range.baseMipLevel = 0; resource_range.levelCount = 1; resource_range.baseArrayLayer = 0; resource_range.layerCount = 1;
+
+        VkImageViewCreateInfo vk_create_info {};
+        PopulateImageViewCreateInfo(ct_create_info, nullptr, 0, swapchain_images[i], VK_IMAGE_VIEW_TYPE_2D,
+            swapchain_image_format, components, resource_range);
+        TransferImageViewCreateInfo(ct_create_info, vk_create_info);
+
+        if(vkCreateImageView(*(device->GetInterfaceDevice()), &vk_create_info, nullptr, &swapchain_image_views[i]) != VK_SUCCESS){
+            throw std::runtime_error("Failed to create image views.");
+        }
+    }
+
+    printf("Finished creating image views.\n");
+}
+
 CtSwapchainSupportDetails CtSwapchain::QuerySwapchainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR* surface){
 
     CtSwapchainSupportDetails support_details;
@@ -45,6 +117,7 @@ CtSwapchain* CtSwapchain::CreateSwapchain(Engine* ct_engine){
     swapchain->device = ct_engine->devices; 
     swapchain->window = ct_engine->window;
     swapchain->InitializeSwapchain(swap_chain_support_details);
+    swapchain->InitializeSwapchainImageViews();
 
     return swapchain;
 }

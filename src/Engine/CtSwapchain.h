@@ -75,11 +75,44 @@ struct CtSwapchainCreateInfoKHR{
     VkSwapchainKHR                   oldSwapchain;
 };
 
+struct CtImageViewCreateInfo{
+    //The structure type
+    VkStructureType            sType;
+
+    //The pointer to the structure extension
+    const void*                pNext;
+
+    //Our image creation flags
+    VkImageViewCreateFlags     flags;
+    /*
+        These values can be:
+        VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DYNAMIC_BIT_EXT       //Specifies that the density map will be read by the device
+        VK_IMAGE_VIEW_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT   //Specifies that the fragment density map will be read by the host
+        VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DEFERRED_BIT_EXT      //Specifies that the image view can be used with descriptor buffers when capturing and replaying
+    */
+
+    //The image that the image view will be create for
+    VkImage                    image;
+
+    //The type of the new image
+    VkImageViewType            viewType;
+
+    //The format specifying the format and type 
+    VkFormat                   format;
+
+    //The component mapping structure for color
+    VkComponentMapping         components;
+
+    //Selects the set of mipmap levels and array levels to be accessible to the view
+    VkImageSubresourceRange    subresourceRange;
+};
+
 class CtSwapchain{
 
     public:
         static CtSwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR* surface);
         static CtSwapchain* CreateSwapchain(Engine* ct_engine);
+        static VkImageView CreateImageView(CtDevice* device, VkImage image, VkFormat format, VkImageAspectFlags aspect_flags);
         
         void RecreateSwapchain();
 
@@ -94,6 +127,7 @@ class CtSwapchain{
         std::vector<VkImage> swapchain_images;
         VkFormat swapchain_image_format;
         VkExtent2D swapchain_extent;
+        std::vector<VkImageView> swapchain_image_views;
 
         void PopulateSwapchainCreateInfo(CtSwapchainCreateInfoKHR& create_info, 
             const void* pointer_to_next, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t min_image_count,
@@ -102,7 +136,14 @@ class CtSwapchain{
             VkSurfaceTransformFlagBitsKHR pre_transform, VkCompositeAlphaFlagBitsKHR composite_alpha, VkPresentModeKHR present_mode,
             VkBool32 clipped, VkSwapchainKHR old_swapchain);
         void TransferSwapchainCreateInfo(CtSwapchainCreateInfoKHR& ct_create_info, VkSwapchainCreateInfoKHR& vk_create_info);
+
+        void PopulateImageViewCreateInfo(CtImageViewCreateInfo& create_info,
+            const void* pointer_to_next, VkImageViewCreateFlags flags, VkImage image, VkImageViewType view_type,
+            VkFormat format, VkComponentMapping components, VkImageSubresourceRange subresource_range);
+        void TransferImageViewCreateInfo(CtImageViewCreateInfo& ct_create_info, VkImageViewCreateInfo& vk_create_info);
+
         void InitializeSwapchain(CtSwapchainSupportDetails support_details);
+        void InitializeSwapchainImageViews();
 
         VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> available_formats);
         VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& present_modes);
