@@ -4,6 +4,7 @@
 class CtDevice;
 class Engine;
 class CtWindow;
+class CtGraphicsPipeline;
 
 struct CtSwapchainSupportDetails{
     VkSurfaceCapabilitiesKHR capabilities;
@@ -116,6 +117,10 @@ class CtSwapchain{
         
         void RecreateSwapchain();
 
+        VkExtent2D GetSwapchainExtent(){
+            return swapchain_extent;
+        }
+
     private:
 
         //The device that this swapchain belongs to
@@ -151,4 +156,5 @@ class CtSwapchain{
 
     friend class Engine;
     friend class CtDevice;
+    friend class CtGraphicsPipeline;
 };

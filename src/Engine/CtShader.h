@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 
 class CtDevice;
+class CtGraphicsPipeline;
+
 struct CtShaderModuleCreateInfo{
 
     //The structure type
@@ -68,13 +70,17 @@ enum CtShaderPipelineStage{
 
 class CtShader{
 
-    VkShaderModule shader_module;
-    CtShaderPipelineStage pipeline_stage;
+    
 
     public:
         static CtShader* CreateShader(CtDevice* device, const std::string& shader_file_name, CtShaderPipelineStage pipeline_stage);
+        VkPipelineShaderStageCreateInfo CreateShaderPipelineInfo();
 
     private:
+
+        VkShaderModule shader_module;
+        CtShaderPipelineStage pipeline_stage;
+
         std::vector<char> ReadFile(const std::string& file_name);
 
         void PopulateShaderModuleCreateInfo(CtShaderModuleCreateInfo& shader_create_info,
@@ -88,6 +94,11 @@ class CtShader{
         void TransferShaderPipelineStageInfo(CtPipelineShaderStageCreateInfo& ct_shader_pipeline_create_info, VkPipelineShaderStageCreateInfo& vk_shader_pipeline_create_info);
 
         void CreateShaderModule(VkDevice* interface_device, const std::string& file_name);
-        VkPipelineShaderStageCreateInfo CreateShaderPipelineInfo();
+
+        void DestroyShaderModule(VkDevice* interface_device){
+            vkDestroyShaderModule(*interface_device, shader_module, nullptr);
+        }
+
+    friend class CtGraphicsPipeline;
 
 };
