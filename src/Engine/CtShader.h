@@ -74,7 +74,7 @@ class CtShader{
 
     public:
         static CtShader* CreateShader(CtDevice* device, const std::string& shader_file_name, CtShaderPipelineStage pipeline_stage);
-        VkPipelineShaderStageCreateInfo CreateShaderPipelineInfo();
+        void CreateShaderPipelineInfo(VkPipelineShaderStageCreateInfo& vk_shader_info);
 
     private:
 

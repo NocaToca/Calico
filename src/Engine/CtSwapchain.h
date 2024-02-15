@@ -5,6 +5,7 @@ class CtDevice;
 class Engine;
 class CtWindow;
 class CtGraphicsPipeline;
+class CtRenderer;
 
 struct CtSwapchainSupportDetails{
     VkSurfaceCapabilitiesKHR capabilities;
@@ -115,7 +116,7 @@ class CtSwapchain{
         static CtSwapchain* CreateSwapchain(Engine* ct_engine);
         static VkImageView CreateImageView(CtDevice* device, VkImage image, VkFormat format, VkImageAspectFlags aspect_flags);
         
-        void RecreateSwapchain();
+        void RecreateSwapchain(VkRenderPass& render_pass);
 
         VkExtent2D GetSwapchainExtent(){
             return swapchain_extent;
@@ -128,11 +129,19 @@ class CtSwapchain{
 
         CtWindow* window;
 
+        CtRenderer* renderer;
+
         VkSwapchainKHR swapchain;
         std::vector<VkImage> swapchain_images;
         VkFormat swapchain_image_format;
         VkExtent2D swapchain_extent;
         std::vector<VkImageView> swapchain_image_views;
+        std::vector<VkFramebuffer> swapchain_framebuffers;
+
+        //Depth textures
+        VkImage depth_image;
+        VkDeviceMemory depth_image_memory;
+        VkImageView depth_image_view;
 
         void PopulateSwapchainCreateInfo(CtSwapchainCreateInfoKHR& create_info, 
             const void* pointer_to_next, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t min_image_count,
@@ -154,7 +163,18 @@ class CtSwapchain{
         VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& present_modes);
         VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
+        void InitializeSwapchainFramebuffers(VkRenderPass& render_pass);
+
+        void Cleanup();
+
+        void CreateDepthResources();
+        void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& image_memory);
+        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout old_layout, VkImageLayout new_layout);
+
+        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspect_flags);
+
     friend class Engine;
     friend class CtDevice;
     friend class CtGraphicsPipeline;
+    friend class CtRenderer;
 };

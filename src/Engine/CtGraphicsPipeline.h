@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <array>
 
 class CtSwapchain;
 class CtShader;
@@ -17,6 +18,9 @@ class CtGraphicsPipeline {
     public:
         static CtGraphicsPipeline* CreateGraphicsPipeline(EngineSettings settings, CtDevice* device, CtSwapchain* swapchain);
 
+        static VkFormat FindSupportedFormat(VkPhysicalDevice* physical_device, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        static VkFormat FindDepthFormat(VkPhysicalDevice* physical_device);
+
     private:
         //Shaders
         std::vector<CtShader*> shaders;
@@ -25,11 +29,13 @@ class CtGraphicsPipeline {
         VkRenderPass render_pass;
         VkDescriptorSetLayout descriptor_set_layout;
         VkPipelineLayout pipeline_layout;
+        std::vector<VkDescriptorSet> descriptor_sets;
 
         //Pipeline creation
         void CreatePipeline(CtDevice* device, const std::vector<std::string>& shader_files, std::vector<uint32_t> stages, CtSwapchain* swapchain);
 
-        VkPipelineVertexInputStateCreateInfo CreateVertexInputState();
+        void CreateVertexInputState(VkPipelineVertexInputStateCreateInfo& vertex_state_create_info, std::array<VkVertexInputAttributeDescription, 3> attribute_description,
+                    VkVertexInputBindingDescription binding_description);
         VkPipelineInputAssemblyStateCreateInfo CreateInputAssemblyState();
         VkPipelineDynamicStateCreateInfo CreateDynamicState();
         VkPipelineViewportStateCreateInfo CreateViewportState(VkViewport& viewport, VkRect2D& scissor);
@@ -50,9 +56,6 @@ class CtGraphicsPipeline {
         //Render pass creation
         void CreateRenderPass(CtDevice* device, CtSwapchain* swapchain);
 
-        static VkFormat FindSupportedFormat(VkPhysicalDevice* physical_device, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-        static VkFormat FindDepthFormat(VkPhysicalDevice* physical_device);
-
         VkAttachmentDescription CreateColorAttachmentDescription(CtSwapchain* swapchain);
         VkAttachmentReference CreateColorAttachmentReference();
         VkSubpassDependency CreateSubpassDependency();
@@ -60,5 +63,8 @@ class CtGraphicsPipeline {
         VkAttachmentReference CreateDepthAttachmentReference();
         VkSubpassDescription CreateSubpassDescription(VkAttachmentReference& color_attachment_reference, VkAttachmentReference& depth_attachment_reference);
 
+        void CreateDescriptorSets(uint32_t max_frames_in_flight);
+
     friend class CtShader;
+    friend class CtRenderer;
 };

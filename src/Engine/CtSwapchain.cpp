@@ -8,6 +8,8 @@
 #include <algorithm>
 #include "Engine.h"
 #include <stdexcept>
+#include <array>
+#include "CtRenderer.h"
 
 //Since this function is static, I'm not going to use CtImageViewCreateInfo since that is not
 VkImageView CtSwapchain::CreateImageView(CtDevice* device, VkImage image, VkFormat format, VkImageAspectFlags aspect_flags){
@@ -267,4 +269,68 @@ void CtSwapchain::PopulateSwapchainCreateInfo(CtSwapchainCreateInfoKHR& create_i
     create_info.presentMode = present_mode;
     create_info.clipped = clipped;
     create_info.oldSwapchain = old_swapchain;
+}
+
+void CtSwapchain::InitializeSwapchainFramebuffers(VkRenderPass& render_pass){
+    swapchain_framebuffers.resize(swapchain_image_views.size());
+
+    for(size_t i = 0; i < swapchain_image_views.size(); i++){
+        std::array<VkImageView, 2> attachments = {
+            swapchain_image_views[i],
+            depth_image_view
+        };
+
+        VkFramebufferCreateInfo framebuffer_info {};
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.renderPass = render_pass;
+        framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebuffer_info.pAttachments = attachments.data();
+        framebuffer_info.width = swapchain_extent.width;
+        framebuffer_info.height = swapchain_extent.height;
+        framebuffer_info.layers = 1;
+
+        if(vkCreateFramebuffer(*(device->GetInterfaceDevice()), &framebuffer_info, nullptr, &swapchain_framebuffers[i]) != VK_SUCCESS){
+            throw std::runtime_error("Failed to create a frame buffer");
+        }
+
+    }
+
+    printf("Created framebuffers.\n");
+}
+
+void CtSwapchain::RecreateSwapchain(VkRenderPass& render_pass){
+    int width = 0, height = 0;
+    glfwGetFramebufferSize((window->GetWindow()), &width, &height);
+
+    while(width == 0 || height == 0){
+        glfwGetFramebufferSize((window->GetWindow()), &width, &height);
+        glfwWaitEvents();
+    }
+
+    vkDeviceWaitIdle(*(device->GetInterfaceDevice()));
+
+    Cleanup();
+
+    InitializeSwapchain(QuerySwapchainSupport(*(device->GetPhysicalDevice()), window->GetSurface()));
+    InitializeSwapchainImageViews();
+    CreateDepthResources();
+    InitializeSwapchainFramebuffers(render_pass);
+}
+
+void CtSwapchain::Cleanup(){
+    VkDevice interface_device = *(device->GetInterfaceDevice());
+
+    vkDestroyImageView(interface_device, depth_image_view, nullptr);
+    vkDestroyImage(interface_device, depth_image, nullptr);
+    vkFreeMemory(interface_device, depth_image_memory, nullptr);
+
+    for(auto framebuffer : swapchain_framebuffers){
+        vkDestroyFramebuffer(interface_device, framebuffer, nullptr);
+    }
+
+    for(auto image_view : swapchain_image_views){
+        vkDestroyImageView(interface_device, image_view, nullptr);
+    }
+
+    vkDestroySwapchainKHR(interface_device, swapchain, nullptr);
 }

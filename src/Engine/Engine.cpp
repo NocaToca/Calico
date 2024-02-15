@@ -6,6 +6,8 @@
 #include "CtInstance.h"
 #include "CtDevice.h"
 #include "CtSwapchain.h"
+#include "CtGraphicsPipeline.h"
+#include "CtRenderer.h"
 
 #define CT_DEBUG
 
@@ -23,6 +25,12 @@ void Engine::CreateObjects(EngineSettings settings){
     CreateSurface(settings);
     CreateDevices(settings);
     CreateSwapchain(settings);
+    CreateGraphicsPipeline(settings);
+    CreateRenderer(settings);
+}
+
+void Engine::CreateGraphicsPipeline(EngineSettings settings){
+    graphics_pipeline = CtGraphicsPipeline::CreateGraphicsPipeline(settings, devices, swapchain);
 }
 
 void Engine::CreateSwapchain(EngineSettings settings){
@@ -46,6 +54,7 @@ void Engine::EngineLoop(){
 
     while(!window->ShouldWindowClose()){
         window->PollEvents();
+
     }
 
 }
@@ -88,5 +97,5 @@ void Engine::CreateInstance(EngineSettings settings){
 }
 
 void Engine::CreateRenderer(EngineSettings settings){
-
+    renderer = CtRenderer::CreateRenderer(settings, devices, swapchain, graphics_pipeline);
 }

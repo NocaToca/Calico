@@ -1,14 +1,21 @@
 #include <cstdint>
+#include <string>
+#include <vector>
 
 class CtWindow;
 class CtInstance;
 class CtDevice;
 class CtSwapchain;
+class CtGraphicsPipeline;
+class CtRenderer;
 
 struct EngineSettings{
 
     uint32_t window_width;
     uint32_t window_height;
+    std::vector<std::string> shader_files; 
+    std::vector<uint32_t> shader_stages;
+    uint32_t max_frames_in_flight;
 
 };
 
@@ -31,6 +38,12 @@ class Engine{
         //Swapchain
         CtSwapchain* swapchain;
 
+        //Pipeline
+        CtGraphicsPipeline* graphics_pipeline;
+
+        //The actual Renderer
+        CtRenderer* renderer;
+
         //Functions
         void EngineLoop();
         void Cleanup();
@@ -41,6 +54,7 @@ class Engine{
         void CreateDevices(EngineSettings settings);
         void CreateSurface(EngineSettings settings);
         void CreateSwapchain(EngineSettings settings);
+        void CreateGraphicsPipeline(EngineSettings settings);
 
     friend class CtDevice;
     friend class CtSwapchain;

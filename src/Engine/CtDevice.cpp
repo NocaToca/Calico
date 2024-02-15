@@ -438,3 +438,16 @@ void CtDevice::EnableFeature(CtPhysicalDeviceFeatures& feature, CtPhysicalDevice
             throw std::runtime_error("Unknown feature");
     }
 }
+
+uint32_t CtDevice::FindMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties){
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
+
+    for(uint32_t i = 0; i < memory_properties.memoryTypeCount; i++){
+        if((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties){
+            return i;
+        }
+    }
+
+    throw std::runtime_error("Failed to find a suitable memory type!");
+}

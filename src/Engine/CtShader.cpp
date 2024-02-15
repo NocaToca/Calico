@@ -41,15 +41,15 @@ void CtShader::CreateShaderModule(VkDevice* interface_device, const std::string&
     if(vkCreateShaderModule(*interface_device, &vk_create_info, nullptr, &shader_module) != VK_SUCCESS){
         throw std::runtime_error("Failed to create shader module.");
     }
+
+    // printf("Created shader module for %s.\n", shader_file_name);
 }
 
-VkPipelineShaderStageCreateInfo CtShader::CreateShaderPipelineInfo(){
+void CtShader::CreateShaderPipelineInfo(VkPipelineShaderStageCreateInfo& vk_create_info){
     CtPipelineShaderStageCreateInfo ct_create_info {};
     PopulateShaderPipelineStageInfo(ct_create_info, nullptr, 0, shader_module, "main", nullptr);
 
-    VkPipelineShaderStageCreateInfo vk_create_info {};
     TransferShaderPipelineStageInfo(ct_create_info, vk_create_info);
-    return vk_create_info;
 }
 
 void CtShader::PopulateShaderModuleCreateInfo(CtShaderModuleCreateInfo& shader_create_info,

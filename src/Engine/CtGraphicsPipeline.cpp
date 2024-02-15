@@ -3,8 +3,28 @@
 #include "CtSwapchain.h"
 #include "CtShader.h"
 #include "CtDevice.h"
+#include "Engine.h"
 #include <array>
 #include <stdexcept>
+
+CtGraphicsPipeline* CtGraphicsPipeline::CreateGraphicsPipeline(EngineSettings settings, CtDevice* device, CtSwapchain* swapchain){
+
+    CtGraphicsPipeline* ct_graphics_pipeline = new CtGraphicsPipeline();
+
+    ct_graphics_pipeline->CreateDescriptorSetLayout(device);
+
+    printf("Created Descriptor Set Layouts.\n");
+
+    ct_graphics_pipeline->CreateRenderPass(device, swapchain);
+
+    printf("Created Render Pass.\n");
+
+    ct_graphics_pipeline->CreatePipeline(device, settings.shader_files, settings.shader_stages, swapchain);
+
+    printf("Created Graphics Pipeline.\n");
+
+    return ct_graphics_pipeline;
+}
 
 void CtGraphicsPipeline::CreatePipeline(CtDevice* device, const std::vector<std::string>& shader_files, std::vector<uint32_t> stages, CtSwapchain* swapchain){
     VkGraphicsPipelineCreateInfo pipeline_info {};    
@@ -19,10 +39,14 @@ void CtGraphicsPipeline::CreatePipeline(CtDevice* device, const std::vector<std:
     }
     
     std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-    shader_stages.resize(i);
+    // shader_stages.resize(i);
 
     for(uint32_t j = 0; j < i; j++){
-        shader_stages.push_back(shaders[i]->CreateShaderPipelineInfo());
+        // printf("Iteration: %d.\n", i);
+        VkPipelineShaderStageCreateInfo vk_shader_create_info {};
+
+        shaders[j]->CreateShaderPipelineInfo(vk_shader_create_info);
+        shader_stages.push_back(vk_shader_create_info);
     }
 
     pipeline_info.stageCount = static_cast<uint32_t>(shader_stages.size()); //should be i but I think this makes more intuitive since sight-reading 
@@ -30,7 +54,11 @@ void CtGraphicsPipeline::CreatePipeline(CtDevice* device, const std::vector<std:
 
     //Now we can move onto the easier stuff!
     //Vertex
-    VkPipelineVertexInputStateCreateInfo vertex_info = CreateVertexInputState();
+    auto binding_description = CtVertex::GetBindingDescription();
+    auto attribute_description = CtVertex::GetAttributeDescriptions(); 
+
+    VkPipelineVertexInputStateCreateInfo vertex_info {};
+    CreateVertexInputState(vertex_info, attribute_description, binding_description);
     pipeline_info.pVertexInputState = &vertex_info;
 
     //Input assembly
@@ -121,6 +149,7 @@ void CtGraphicsPipeline::CreateRenderPass(CtDevice* device, CtSwapchain* swapcha
     }
 }
 
+
 //Comparitively, this is pretty small. So we'll just keep everything in a function to avoid making too many
 void CtGraphicsPipeline::CreateDescriptorSetLayout(CtDevice* device){
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
@@ -151,9 +180,9 @@ void CtGraphicsPipeline::CreateDescriptorSetLayout(CtDevice* device){
     }
 }
 
-
-VkPipelineVertexInputStateCreateInfo CtGraphicsPipeline::CreateVertexInputState(){
-    VkPipelineVertexInputStateCreateInfo vertex_state_create_info {};
+void CtGraphicsPipeline::CreateVertexInputState(VkPipelineVertexInputStateCreateInfo& vertex_state_create_info, 
+    std::array<VkVertexInputAttributeDescription, 3> attribute_description,
+    VkVertexInputBindingDescription binding_description){
 
     //Obviously, we have to define the structure type first
     vertex_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -161,20 +190,16 @@ VkPipelineVertexInputStateCreateInfo CtGraphicsPipeline::CreateVertexInputState(
     //Next we have to get our binding descriptions
     //We use our CtVertex class defined in CtVertex.h to represent vertices. We have a helpful function to
     //Grab our binding descriptions!
-    auto binding_description = CtVertex::GetBindingDescription();
 
     //We only ever have one for now - multiple would be for multiple different representation classes
     vertex_state_create_info.vertexBindingDescriptionCount = 1;
     vertex_state_create_info.pVertexBindingDescriptions = &binding_description;
 
     //Now we do the same thing for our attribute descriptions
-    auto attribute_description = CtVertex::GetAttributeDescriptions();
 
     //And then we fill and return!
     vertex_state_create_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribute_description.size());
     vertex_state_create_info.pVertexAttributeDescriptions = attribute_description.data();
-
-    return vertex_state_create_info;
 }
 
 VkPipelineInputAssemblyStateCreateInfo CtGraphicsPipeline::CreateInputAssemblyState(){
@@ -190,25 +215,6 @@ VkPipelineInputAssemblyStateCreateInfo CtGraphicsPipeline::CreateInputAssemblySt
     input_assembly_state_create_info.primitiveRestartEnable = VK_FALSE;
 
     return input_assembly_state_create_info;
-}
-
-VkPipelineDynamicStateCreateInfo CtGraphicsPipeline::CreateDynamicState(){
-    VkPipelineDynamicStateCreateInfo dynamic_state_create_info {};
-
-    //Let's define our dynamic states
-    std::vector<VkDynamicState> dynamic_states = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
-
-    //Define our structure type
-    dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-
-    //Then let's feed our struct the information 
-    dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
-    dynamic_state_create_info.pDynamicStates = dynamic_states.data();
-
-    return dynamic_state_create_info;
 }
 
 VkPipelineViewportStateCreateInfo CtGraphicsPipeline::CreateViewportState(VkViewport& viewport, VkRect2D& scissor){
@@ -434,6 +440,25 @@ VkSubpassDescription CtGraphicsPipeline::CreateSubpassDescription(VkAttachmentRe
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
     return subpass;
+}
+
+//Let's define our dynamic states
+std::vector<VkDynamicState> dynamic_states = {
+    VK_DYNAMIC_STATE_VIEWPORT,
+    VK_DYNAMIC_STATE_SCISSOR
+};
+
+VkPipelineDynamicStateCreateInfo CtGraphicsPipeline::CreateDynamicState(){
+    VkPipelineDynamicStateCreateInfo dynamic_state_create_info {};
+
+    //Define our structure type
+    dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+
+    //Then let's feed our struct the information 
+    dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
+    dynamic_state_create_info.pDynamicStates = dynamic_states.data();
+
+    return dynamic_state_create_info;
 }
 
 VkFormat CtGraphicsPipeline::FindSupportedFormat(VkPhysicalDevice* physical_device, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features){

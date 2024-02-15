@@ -6,6 +6,7 @@ class CtInstance;
 class Engine;
 struct EngineSettings;
 class CtQueueFamily;
+class CtRenderer;
 
 //Basically a set of checks that we can use to check if our device is suitable
 struct CtDeviceRequirments{
@@ -174,6 +175,8 @@ class CtDevice{
             return &physical_device;
         }
 
+        uint32_t FindMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties);
+
     private:
         //The actual GPU
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
@@ -213,4 +216,5 @@ class CtDevice{
     friend class Engine;
     friend class CtQueueFamily;
     friend class CtSwapchain;
+    friend class CtRenderer;
 };

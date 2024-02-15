@@ -51,5 +51,6 @@ class CtQueueFamily{
         void TransferQueueFamilyCreate(CtDeviceQueueCreateInfo& ct_create_info, VkDeviceQueueCreateInfo& vk_create_info);
 
     friend class CtDevice;
+    friend class CtRenderer;
 };
 
