@@ -54,7 +54,7 @@ void Engine::EngineLoop(){
 
     while(!window->ShouldWindowClose()){
         window->PollEvents();
-
+        renderer->DrawFrame();
     }
 
 }
