@@ -9,13 +9,21 @@ class CtSwapchain;
 class CtGraphicsPipeline;
 class CtRenderer;
 
-struct EngineSettings{
-
+struct WindowSettings{
     uint32_t window_width;
     uint32_t window_height;
+};
+
+struct GraphicsSettings{
     std::vector<std::string> shader_files; 
     std::vector<uint32_t> shader_stages;
     uint32_t max_frames_in_flight;
+};
+
+struct EngineSettings{
+
+    WindowSettings windows_settings;
+    GraphicsSettings graphics_settings;
 
 };
 

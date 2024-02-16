@@ -47,7 +47,7 @@ void Engine::CreateDevices(EngineSettings settings){
 
 void Engine::CreateWindow(EngineSettings settings){
     const std::string engine_name ("Calico");
-    window = CtWindow::CreateWindow(settings.window_width, settings.window_height, engine_name);
+    window = CtWindow::CreateWindow(settings.windows_settings.window_width, settings.windows_settings.window_height, engine_name);
 }
 
 void Engine::EngineLoop(){

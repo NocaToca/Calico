@@ -16,16 +16,20 @@ int main(){
     Engine engine;
 
     EngineSettings settings {};
-    settings.window_width = WIDTH;
-    settings.window_height = HEIGHT;
+    WindowSettings window_settings {};
+    window_settings.window_width = WIDTH;
+    window_settings.window_height = HEIGHT;
 
     std::string fragment("C:/Calico/Shaders/frag.spv");
     std::string vertex("C:/Calico/Shaders/vert.spv");
 
-    settings.shader_files = {fragment, vertex};
-    settings.shader_stages = {static_cast<uint32_t>(CT_SHADER_PIPELINE_STAGE_FRAGMENT), static_cast<uint32_t>(CT_SHADER_PIPELINE_STAGE_VERTEX)};
+    GraphicsSettings graphic_settings {};
+    graphic_settings.shader_files = {fragment, vertex};
+    graphic_settings.shader_stages = {static_cast<uint32_t>(CT_SHADER_PIPELINE_STAGE_FRAGMENT), static_cast<uint32_t>(CT_SHADER_PIPELINE_STAGE_VERTEX)};
+    graphic_settings.max_frames_in_flight = 2;
 
-    settings.max_frames_in_flight = 2;
+    settings.windows_settings = window_settings;
+    settings.graphics_settings = graphic_settings;
 
     try{
         engine.StartEngine(settings);

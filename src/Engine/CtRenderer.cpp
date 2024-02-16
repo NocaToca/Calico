@@ -14,7 +14,7 @@ CtRenderer* CtRenderer::CreateRenderer(EngineSettings settings, CtDevice* device
     ct_renderer->swapchain = swapchain;
     ct_renderer->device = device;
     ct_renderer->graphics_pipeline = graphics_pipeline;
-    ct_renderer->max_frames_in_flight = settings.max_frames_in_flight;
+    ct_renderer->max_frames_in_flight = settings.graphics_settings.max_frames_in_flight;
     ct_renderer->current_frame = 0;
     ct_renderer->CreateSyncObjects();
     ct_renderer->CreateCommandPool();

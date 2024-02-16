@@ -19,7 +19,7 @@ CtGraphicsPipeline* CtGraphicsPipeline::CreateGraphicsPipeline(EngineSettings se
 
     printf("Created Render Pass.\n");
 
-    ct_graphics_pipeline->CreatePipeline(device, settings.shader_files, settings.shader_stages, swapchain);
+    ct_graphics_pipeline->CreatePipeline(device, settings.graphics_settings.shader_files, settings.graphics_settings.shader_stages, swapchain);
 
     printf("Created Graphics Pipeline.\n");
 
