@@ -17,8 +17,21 @@ void CtRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMem
     buffer_info.usage = usage;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if(vkCreateBuffer(interface_device, &buffer_info, nullptr, &buffer) != VK_SUCCESS){
-        throw std::runtime_error("Failed to create buffer.");
+    VkResult result = vkCreateBuffer(interface_device, &buffer_info, nullptr, &buffer);
+    
+    switch(result){
+        case VK_SUCCESS:
+            //do nothing
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failure to end command buffer. Host is out of memory.\n");
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to end command buffer. Device is out of memory.\n");
+            break;
+        default:
+            throw std::runtime_error("Failed to end command buffer.\n");
+            break;
     }
 
     VkMemoryRequirements memory_requirements;
@@ -29,8 +42,24 @@ void CtRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMem
     allocate_info.allocationSize = memory_requirements.size;
     allocate_info.memoryTypeIndex = device->FindMemoryType(memory_requirements.memoryTypeBits, properties);
 
-    if(vkAllocateMemory(interface_device, &allocate_info, nullptr, &buffer_memory) != VK_SUCCESS){
-        throw std::runtime_error("Failed to allocate memory buffer");
+    result = vkAllocateMemory(interface_device, &allocate_info, nullptr, &buffer_memory);
+
+    switch(result){
+        case VK_SUCCESS:
+            //do nothing
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failure to allocate memory. Host is out of memory.\n");
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to allocate memory. Device is out of memory.\n");
+            break;
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:
+            throw std::runtime_error("Failure to allocate memory. Handler is invalid.");
+            break;
+        default:
+            throw std::runtime_error("Failed to allocate memory.\n");
+            break;
     }
 
     vkBindBufferMemory(interface_device, buffer, buffer_memory, 0);
@@ -194,7 +223,20 @@ void CtRenderer::RecordCommandBuffer(VkCommandBuffer command_buffer, uint32_t im
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS){
-        throw std::runtime_error("failed to record command buffer!");
+    VkResult result = vkEndCommandBuffer(command_buffer);
+
+    switch(result){
+        case VK_SUCCESS:
+            //do nothing
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failure to end command buffer. Host is out of memory.\n");
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to end command buffer. Device is out of memory.\n");
+            break;
+        default:
+            throw std::runtime_error("Failed to end command buffer.\n");
+            break;
     }
 }
