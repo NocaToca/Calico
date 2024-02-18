@@ -96,9 +96,19 @@ void CtGraphicsPipeline::CreatePipeline(CtDevice* device, const std::vector<std:
     //Pipeline layout!
     VkPipelineLayoutCreateInfo pipeline_layout_info = CreatePipelineLayout();
 
-    if(vkCreatePipelineLayout(*(device->GetInterfaceDevice()), &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS){
-        throw std::runtime_error("Failed to create a pipeline layout!");
+    VkResult result = vkCreatePipelineLayout(*(device->GetInterfaceDevice()), &pipeline_layout_info, nullptr, &pipeline_layout);
+
+    switch(result){
+        case VK_SUCCESS:
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failed to create a pipeline layout. Out of host memory.\n");
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failed to create a pipeline layout. Out of device memory.\n");
+        default:
+            throw std::runtime_error("Failed to create a pipeline layout!");
     }
+    
 
     pipeline_info.layout = pipeline_layout;
 
@@ -106,8 +116,20 @@ void CtGraphicsPipeline::CreatePipeline(CtDevice* device, const std::vector<std:
     pipeline_info.renderPass = render_pass;
     pipeline_info.subpass = 0;
 
-    if(vkCreateGraphicsPipelines(*(device->GetInterfaceDevice()), VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline) != VK_SUCCESS){
-        throw std::runtime_error("Failed to create graphics pipeline!");
+    result = vkCreateGraphicsPipelines(*(device->GetInterfaceDevice()), VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline);
+    switch(result){
+        case VK_SUCCESS:
+            break;
+        case VK_PIPELINE_COMPILE_REQUIRED_EXT:
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failed to create graphics pipeline. Out of host memory.\n");
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failed to create graphics pipeline. Out of device memory.\n");
+        case VK_ERROR_INVALID_SHADER_NV:
+            throw std::runtime_error("Failed to create graphics pipeline. Shader error.\n");
+        default:
+            throw std::runtime_error("Failed to create graphics pipeline.\n");
     }
 
     //Now we just have to tell our shaders to destroy their modules

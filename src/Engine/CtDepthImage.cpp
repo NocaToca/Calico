@@ -64,8 +64,20 @@ void CtSwapchain::CreateImage(uint32_t width, uint32_t height, VkFormat format, 
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
     image_info.flags = 0;
 
-    if(vkCreateImage(interface_device, &image_info, nullptr, &image) != VK_SUCCESS){
-        throw std::runtime_error("Failed to create texture image");
+    VkResult result = vkCreateImage(interface_device, &image_info, nullptr, &image);
+    switch(result){
+        case VK_SUCCESS:
+            //do nothing
+            break;
+        case VK_ERROR_OUT_OF_MEMORY:
+            throw std::runtime_error("Failure to create image. Host is out of memory.\n");
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to create image. Device is out of memory.\n");
+        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT:
+            throw std::runtime_error("Failure to create image. Compression exhuasted.\n");
+        default:
+            throw std::runtime_error("Failure to create image.\n")
+
     }
 
     VkMemoryRequirements memory_requirements;
@@ -76,8 +88,24 @@ void CtSwapchain::CreateImage(uint32_t width, uint32_t height, VkFormat format, 
     allocate_info.allocationSize = memory_requirements.size;
     allocate_info.memoryTypeIndex = device->FindMemoryType(memory_requirements.memoryTypeBits, properties);
 
-    if(vkAllocateMemory(interface_device, &allocate_info, nullptr, &image_memory) != VK_SUCCESS){
-        throw std::runtime_error("Failed to allocate memory for image.");
+    result = vkAllocateMemory(interface_device, &allocate_info, nullptr, &image_memory);
+
+    switch(result){
+        case VK_SUCCESS:
+            //do nothing
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failure to allocate memory. Host is out of memory.\n");
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to allocate memory. Device is out of memory.\n");
+            break;
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:
+            throw std::runtime_error("Failure to allocate memory. Handler is invalid.\n");
+            break;
+        default:
+            throw std::runtime_error("Failed to allocate memory.\n");
+            break;
     }
 
     vkBindImageMemory(interface_device, image, image_memory, 0);

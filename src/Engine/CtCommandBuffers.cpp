@@ -24,13 +24,13 @@ void CtRenderer::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMem
             //do nothing
             break;
         case VK_ERROR_OUT_OF_HOST_MEMORY:
-            throw std::runtime_error("Failure to end command buffer. Host is out of memory.\n");
+            throw std::runtime_error("Failure to create command buffer. Host is out of memory.\n");
             break;
         case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-            throw std::runtime_error("Failure to end command buffer. Device is out of memory.\n");
+            throw std::runtime_error("Failure to create command buffer. Device is out of memory.\n");
             break;
         default:
-            throw std::runtime_error("Failed to end command buffer.\n");
+            throw std::runtime_error("Failed to create command buffer.\n");
             break;
     }
 

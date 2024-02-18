@@ -104,6 +104,7 @@ void CtInstance::SetupDebugInstance(){
     vk_create_info.pfnUserCallback = ct_debug_create_info.pfnUserCallback;
     vk_create_info.pUserData = nullptr;
 
+    //idk where the error returns are
     if(CreateDebugUtilsMessengerEXT(instance, &vk_create_info, nullptr, &debug_messenger) != VK_SUCCESS){
         throw std::runtime_error("Debug extension is not supported.");
     }

@@ -196,12 +196,29 @@ void CtDevice::CreateInterfaceDevice(){
     VkDeviceCreateInfo vk_interface_create_info {};
     TransferCreateInfo(ct_interface_create_info, vk_interface_create_info);
 
-    if(vkCreateDevice(physical_device, &vk_interface_create_info, nullptr, &interface_device) != VK_SUCCESS){
-        throw std::runtime_error("Failed to create an interface device");
+    VkResult result = vkCreateDevice(physical_device, &vk_interface_create_info, nullptr, &interface_device) 
+
+    switch(result){
+        case VK_SUCCESS:
+            printf("Created interface device.\n");
+            break;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            throw std::runtime_error("Failure to create interface device. Host is out of memory.\n");
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            throw std::runtime_error("Failure to create interface device. Device is out of memory.\n");
+        case VK_ERROR_INITIALIZATION_FAILED:
+            throw std::runtime_error("Failure to create interface device. Initialization has failed.\n");
+        case VK_ERROR_EXTENSION_NOT_PRESENT:
+            throw std::runtime_error("Failure to create interface device. Extension needed was not present.\n");
+        case VK_ERROR_FEATURE_NOT_PRESENT:
+            throw std::runtime_error("Failure to create interface device. Feature needed was not present.\n");
+        case VK_ERROR_TOO_MANY_OBJECTS:
+            throw std::runtime_error("Failure to create interface device. Too many objects.\n");
+        case VK_ERROR_DEVICE_LOST:
+            throw std::runtime_error("Failure to create interface device. Device was lost.\n");
+        default:
+            throw std::runtime_error("Failed to create an interface device");
     }
-
-    printf("Created interface device.\n");
-
     vkGetDeviceQueue(interface_device, queue_family->graphics_family.value(), 0, &(queue_family->graphics_queue));
     vkGetDeviceQueue(interface_device, queue_family->present_family.value(), 0, &(queue_family->present_queue));
 
